@@ -262,10 +262,4 @@ class UserController extends Controller
         return null;
     }
 
-    public function getUserImageUrl()
-    {
-        // This method still needs authentication to get the current user
-        // For development, you might want to pass a user ID or create a different approach
-        return response()->json(['imageUrl' => null]);
-    }
 }

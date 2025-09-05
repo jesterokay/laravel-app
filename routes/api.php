@@ -16,4 +16,3 @@ Route::post('/users', [UserController::class, 'store']);
 Route::get('/users/{user}', [UserController::class, 'show']);
 Route::post('/users/{user}', [UserController::class, 'update']);
 Route::delete('/users/{user}', [UserController::class, 'destroy']);
-Route::get('/user/image-url', [UserController::class, 'getUserImageUrl']);
