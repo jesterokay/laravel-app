@@ -4,7 +4,7 @@ namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
-use App\Models\Employee;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -16,27 +16,27 @@ class AttendanceController extends Controller
     public function index(Request $request)
     {
         // Build query for the authenticated user's attendance records only
-        $query = Attendance::with('employee')->where('employee_id', auth()->user()->id);
+        $query = Attendance::with('user')->where('user_id', auth()->user()->id);
 
         // Paginate results
         $attendances = $query->paginate(20);
 
         // Get the authenticated employee for display (optional dropdown or name)
-        $employees = Employee::where('id', auth()->user()->id)->get();
+        $users = User::where('id', auth()->user()->id)->get();
 
-        return view('attendances.index', compact('attendances', 'employees'));
+        return view('attendances.index', compact('attendances', 'users'));
     }
 
     public function create()
     {
-        $employees = Employee::all();
-        return view('attendances.create', compact('employees'));
+        $users = User::all();
+        return view('attendances.create', compact('users'));
     }
 
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
+            'user_id' => 'required|exists:users,id',
             'date' => 'required|date',
             'check_in' => 'nullable|date_format:H:i',
             'check_out' => 'nullable|date_format:H:i|after:check_in',
@@ -62,7 +62,7 @@ class AttendanceController extends Controller
 
     public function show($id)
     {
-        $attendance = Attendance::with('employee')->findOrFail($id);
+        $attendance = Attendance::with('user')->findOrFail($id);
         return view('attendances.show', compact('attendance'));
     }
 
@@ -70,8 +70,8 @@ class AttendanceController extends Controller
     public function edit($id)
     {
         $attendance = Attendance::findOrFail($id);
-        $employees = Employee::all();
-        return view('attendances.edit', compact('attendance', 'employees'));
+        $users = User::all();
+        return view('attendances.edit', compact('attendance', 'users'));
     }
 
     // Update attendance record
@@ -80,7 +80,7 @@ class AttendanceController extends Controller
         $attendance = Attendance::findOrFail($id);
 
         $validatedData = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
+            'user_id' => 'required|exists:users,id',
             'date' => 'required|date',
             'check_in' => 'nullable|date_format:H:i',
             'check_out' => 'nullable|date_format:H:i|after:check_in',
@@ -110,15 +110,15 @@ class AttendanceController extends Controller
     // Handle Check In / Check Out
     public function toggle(Request $request)
     {
-        $employee_id = auth()->user()->id;
+        $user_id = auth()->user()->id;
         $today = Carbon::today();
-        $attendance = Attendance::where('employee_id', $employee_id)
+        $attendance = Attendance::where('user_id', $user_id)
             ->where('date', $today)
             ->first();
 
         if (!$attendance) {
             Attendance::create([
-                'employee_id' => $employee_id,
+                'user_id' => $user_id,
                 'date' => $today,
                 'check_in' => now(),
                 'status' => 'present'
